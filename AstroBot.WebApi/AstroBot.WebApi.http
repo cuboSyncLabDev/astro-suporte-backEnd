@@ -1,0 +1,6 @@
+@AstroBot.WebApi_HostAddress = http://localhost:5285
+
+GET {{AstroBot.WebApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
