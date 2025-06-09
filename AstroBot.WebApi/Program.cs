@@ -1,3 +1,11 @@
+using AstroBot.Application.Interfaces;
+using AstroBot.Application.Services;
+using AstroBot.Domain.Interfaces;
+using AstroBot.Infrastructure.Services;
+using AstroBot.Infrastructure.Services.Interfaces;
+using AstroBot.Persistence.Context;
+using AstroBot.Persistence.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace AstroBot.WebApi
 {
@@ -13,6 +21,13 @@ namespace AstroBot.WebApi
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
+            builder.Services.AddScoped<IAuthService, AuthService>();
+            builder.Services.AddSingleton<IJwtProvider, JwtProvider>();
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
