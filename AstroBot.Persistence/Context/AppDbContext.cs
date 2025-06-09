@@ -1,4 +1,5 @@
 ﻿using AstroBot.Domain.Entities;
+using AstroBot.Persistence.Mappings;
 using Microsoft.EntityFrameworkCore;
 
 namespace AstroBot.Persistence.Context
@@ -9,5 +10,11 @@ namespace AstroBot.Persistence.Context
             : base(options) { }
 
         public DbSet<User> Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfiguration(new UserMapping());
+        }
     }
 }

@@ -5,8 +5,8 @@ namespace AstroBot.Application.Interfaces
 {
     public interface IAuthService
     {
-        Task<LoginResponse?> LoginAsync(LoginRequest request);
-        Task<bool> RegisterAsync(RegisterUserRequest request);
-        Task<bool> ResetPasswordAsync(ResetPasswordRequest request);
+        Task<ResponseBase<LoginResponseData>> LoginAsync(LoginRequest request);
+        Task<ResponseBase<MessageResponseData>> RegisterAsync(RegisterUserRequest request);
+        Task<ResponseBase<MessageResponseData>> ResetPasswordAsync(ResetPasswordRequest request);
     }
 }

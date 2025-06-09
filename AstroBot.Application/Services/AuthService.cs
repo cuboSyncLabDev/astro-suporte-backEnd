@@ -4,6 +4,7 @@ using AstroBot.Application.Interfaces;
 using AstroBot.Domain.Entities;
 using AstroBot.Domain.Interfaces;
 using AstroBot.Infrastructure.Services.Interfaces;
+using System.Net;
 
 namespace AstroBot.Application.Services
 {
@@ -12,23 +13,22 @@ namespace AstroBot.Application.Services
         IJwtProvider _jwtProvider
         ) : IAuthService
     {
-        public async Task<LoginResponse?> LoginAsync(LoginRequest request)
+        public async Task<ResponseBase<LoginResponseData>> LoginAsync(LoginRequest request)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-                return null;
+                return ResponseBase<LoginResponseData>.Error("Invalid credentials", HttpStatusCode.Unauthorized);
 
             var token = _jwtProvider.GenerateToken(user);
-
-            return new LoginResponse(token);
+            return ResponseBase<LoginResponseData>.Success(new LoginResponseData(token));
         }
 
-        public async Task<bool> RegisterAsync(RegisterUserRequest request)
+        public async Task<ResponseBase<MessageResponseData>> RegisterAsync(RegisterUserRequest request)
         {
             var existingUser = await _userRepository.GetByEmailAsync(request.Email);
             if (existingUser != null)
-                return false;
+                return ResponseBase<MessageResponseData>.Error("User already exists", HttpStatusCode.BadRequest);
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
             var user = new User
@@ -39,18 +39,18 @@ namespace AstroBot.Application.Services
             };
 
             await _userRepository.CreateAsync(user);
-            return true;
+            return ResponseBase<MessageResponseData>.Success(new MessageResponseData("User registered successfully"));
         }
 
-        public async Task<bool> ResetPasswordAsync(ResetPasswordRequest request)
+        public async Task<ResponseBase<MessageResponseData>> ResetPasswordAsync(ResetPasswordRequest request)
         {
             var user = await _userRepository.GetByEmailAsync(request.Email);
             if (user == null)
-                return false;
+                return ResponseBase<MessageResponseData>.Error("User not found", HttpStatusCode.NotFound);
 
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
             await _userRepository.UpdateAsync(user);
-            return true;
+            return ResponseBase<MessageResponseData>.Success(new MessageResponseData("Password reset successfully"));
         }
     }
 }

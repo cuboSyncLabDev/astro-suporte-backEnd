@@ -1,44 +1,36 @@
 ﻿using AstroBot.Application.DTOs.Requests;
 using AstroBot.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AstroBot.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class AuthController(IAuthService _authService) : ControllerBase
     {
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
-            var result = await _authService.LoginAsync(request);
-
-            if (result == null)
-                return Unauthorized(new { message = "Invalid credentials" });
-
-            return Ok(result);
+            var response = await _authService.LoginAsync(request);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserRequest request)
         {
-            var result = await _authService.RegisterAsync(request);
-
-            if (!result)
-                return BadRequest(new { message = "User already exists" });
-
-            return Ok(new { message = "User registered successfully" });
+            var response = await _authService.RegisterAsync(request);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpPost("reset-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
-            var result = await _authService.ResetPasswordAsync(request);
-
-            if (!result)
-                return NotFound(new { message = "User not found" });
-
-            return Ok(new { message = "Password reset successfully" });
+            var response = await _authService.ResetPasswordAsync(request);
+            return StatusCode((int)response.StatusCode, response);
         }
     }
 }
